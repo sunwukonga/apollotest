@@ -1,0 +1,36 @@
+{
+  "name": "itsy-server",
+  "version": "1.0.0",
+  "description": "Itsybit backend server",
+  "main": "build/server.js",
+  "scripts": {
+    "type-check": "tsc",
+    "type-check:watch": "npm run type-check -- --watch",
+    "build": "npm run build:types && npm run build:js",
+    "build:types": "tsc --emitDeclarationOnly --declaration",
+    "build:js": "babel src --out-dir build --extensions \".ts\"",
+    "start": "node build/server.js"
+  },
+  "author": "Paul Desmond Parker",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "apollo-server-express": "^2.6.2",
+    "dotenv": "^8.0.0",
+    "express": "^4.17.1",
+    "graphql": "^14.3.1"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.5",
+    "@babel/plugin-proposal-class-properties": "^7.4.4",
+    "@babel/plugin-proposal-object-rest-spread": "^7.4.4",
+    "@babel/preset-env": "^7.4.5",
+    "@babel/preset-typescript": "^7.3.3",
+    "@types/bluebird": "^3.5.27",
+    "@types/graphql": "^14.2.0",
+    "@types/node": "^12.0.7",
+    "@types/validator": "^10.11.1",
+    "typescript": "^3.5.1"
+  }
+}

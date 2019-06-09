@@ -1,0 +1,76 @@
+
+Install nvm with:
+`curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash`
+then close session and re-open new one (sets environment variables properly).
+
+Install latest node
+`nvm install node`
+
+Install yarn with:
+  install repo
+```
+curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+```
+  update apt
+`sudo apt update`
+  install yarn
+`sudo apt install --no-install-recommends yarn`
+the --no-install-recommends is so nodejs is not reinstalled
+
+Make directory for repo:
+```
+cd ~/code
+mkdir itsy-server
+```
+
+Initiate node package
+```
+yarn init
+```
+itsy-server; itsybit backend server; server.js; private true
+
+[Note] No means of pinning a rootCA for the Expo app. This means we cannot use a self-signed certificate.
+When we go to production we will need a proper domain and paid SSL certificate. In the meantime, use no
+cert in development. If we're really lucky, by the time we app is ready for production, we'll be able
+to use a self signed certificate: https://datacenteroverlords.com/2012/03/01/creating-your-own-ssl-certificate-authority/
+Which would mean that this issue (https://expo.canny.io/feature-requests/p/ssl-pinning) was implemented.
+
+Yarn install packages
+	express
+	apollo-server-express			#necessary to use SSL with ApolloServer
+	graphql
+	dotenv					#allow .env config for development and local
+	typescript		(--save-dev)
+	@types/graphql		(--save-dev)
+	@types/node		(--save-dev)
+	@types/validator	(--save-dev)
+	@types/bluebird		(--save-dev)
+
+Add tsconfig.json for truescript config
+[tsc compiling without error] 
+
+	@babel			(--save-dev)
+
+	express-jwt
+	sequelize
+	sequelize-cli		(--save-dev)
+	mysql2
+	catchify				#cut down on clutter around promises returned by sequelize operations
+						# const [error, value] = await catchify(aPromise)
+	riteway			(--save-dev)	#testing
+
+Using dotenv with typescript:
+https://github.com/motdotla/dotenv/blob/master/examples/typescript/src/lib/env.ts
+Catchify:
+https://www.npmjs.com/package/catchify
+Sequelize with typescript:
+http://docs.sequelizejs.com/manual/typescript
+
+    "types": [ "expo" ],
+    "paths": {
+      "expo": [
+        "../node_modules/@types/expo",
+        "../node_modules/expo"
+      ]
+    },
