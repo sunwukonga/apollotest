@@ -28,7 +28,7 @@ Initiate node package
 ```
 yarn init
 ```
-itsy-server; itsybit backend server; server.js; private true
+package.json: itsy-server; itsybit backend server; server.js; private true
 
 [Note] No means of pinning a rootCA for the Expo app. This means we cannot use a self-signed certificate.
 When we go to production we will need a proper domain and paid SSL certificate. In the meantime, use no
@@ -50,7 +50,88 @@ Yarn install packages
 Add tsconfig.json for truescript config
 [tsc compiling without error] 
 
-	@babel			(--save-dev)
+	@babel						(--save-dev)
+	@babel/cli					(--save-dev)
+	@babel/core					(--save-dev)
+	@babel/plugin-proposal-class-properties		(--save-dev)
+	@babel/plugin-proposal-object-rest-spread	(--save-dev)
+	@babel/preset-env				(--save-dev)
+	@babel/preset-typescript			(--save-dev)
+
+Opted for a toolchain that doesn't attempt to compile typescript code. Instead, we use the typescript to guarantee type safety, then use the
+@babel/preset-typescript plugin to strip the typescript code during builds. The cool thing is that babel works directly on the `.ts` files.
+To do this we added following script calls to package.json:
+    "type-check": "tsc",
+    "type-check:watch": "npm run type-check -- --watch",
+    "build": "npm run build:types && npm run build:js",
+    "build:types": "tsc --emitDeclarationOnly --declaration",			<--- Not working. Settings need tweaking. If I need Declarations, I'll do manually.
+    "build:js": "babel src --out-dir build --extensions \".ts\"",		<--- The ts magic is --extensions \".ts\"
+    "start": "node build/server.js"
+
+Note: no testing implemented as yet.
+
+To use:
+`npm run type-check`  	<-- checks that types are in order. Nothing is emited, nothing changed, as per babel.config.js
+`npm run build:js` 	<-- puts transpiled code into `build` directory
+`npm start`		<-- starts server (later we'll be using something like nodemon(dev), pm2(prod), or supervisor(prod) to keep this up.
+The beauty of this approach is that types can be checked without destroying workflow and running up against niggling problems.
+Later we'll watch for changes to /src and build --> start automatically
+
+Use iptables to re-route incoming traffic from port 80 to port 4000. Non-root user cannot open port 80, therefore we route all tcp traffic to our
+nodejs application (open on port 4000) instead.
+```
+sudo iptables -A INPUT -p tcp --dport 4000 -j ACCEPT
+sudo iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+sudo iptables -t nat -A PREROUTING -i ens3 -o lo -p tcp --dport 80 -j REDIRECT --to-port 4000
+
+```
+Initial data, resolver, and schema looked like this:
+```
+const books = [
+  {
+    title: 'Harry Potter and the Chamber of Secrets',
+    author: 'J.K. Rowling',
+  },
+  {
+    title: 'Jurassic Park',
+    author: 'Michael Crichton',
+  },
+];
+const typeDefs = gql`
+  type Book {
+    title: String
+    author: String
+  }
+  type Query {
+    books: [Book]
+  }
+`;
+const resolvers = {
+  Query: {
+    books: () => books,
+  },
+};
+```
+Visiting 139.99.105.128/graphql now allows access to the graphql playground for exploring the schema (introspection and making queries)
+Raw query using netcat:
+```
+printf "GET /graphql?query=query%%20books%%20%%7B%%20books%%20%%7B%%20title%%20%%2Cauthor%%20%%7D%%20%%7D&operationName=books HTTP/1.0\r\n\r\n" | nc localhost 80
+```
+Generating graphql schema types:
+codegen.yml (root directory)
+```
+schema: http://localhost:4000/graphql
+generates:
+./src/generated/schema.types.ts:
+plugins:
+  - typescript
+```
+package.json
+"scripts": { "generate-graphql-types": "graphql-codegen" },
+"devDependencies": {
+	"@graphql-codegen/cli": "^1.0.7",
+	"@graphql-codegen/typescript": "^1.0.7" 
+}
 
 	express-jwt
 	sequelize

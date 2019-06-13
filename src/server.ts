@@ -23,14 +23,21 @@ const typeDefs = gql`
   # Comments in GraphQL are defined with the hash (#) symbol.
 
   # This "Book" type can be used in other type declarations.
+  "This type is for storing book data"
   type Book {
+    """
+    The title is cool
+    It lets you find a book again, which I suppose must be useful. I'm am just testing the length of comment now though.
+    """
     title: String
+    "Authors can also be cool"
     author: String
   }
 
   # The "Query" type is the root of all GraphQL queries.
   # (A "Mutation" type will be covered later on.)
   type Query {
+    "Where would this show up"
     books: [Book]
   }
 `;
@@ -52,8 +59,8 @@ const config = configurations[environment]
 const apollo = new ApolloServer({
   typeDefs
 , resolvers
-, introspection: true
-, playground: true
+//, introspection: true
+//, playground: true
 })
 
 const app = express()
